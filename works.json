@@ -1,4 +1,10 @@
 {
   "version": 1,
-  "works": []
+  "works": [
+    {
+      "slug": "app-a3f447806cb3",
+      "title": "Fireworks",
+      "description": ""
+    }
+  ]
 }
