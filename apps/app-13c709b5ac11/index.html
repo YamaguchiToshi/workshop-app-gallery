@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#261b55">
+<title>わくわく！あそびワールド</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,sans-serif}
+body{background:#261b55}
+#joyapp{width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(145deg,#261b55,#542a78 55%,#192d63);color:white;touch-action:pan-y}
+button{font:inherit;touch-action:manipulation;cursor:pointer;color:white}
+.top{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;gap:8px}
+.heading{font-size:clamp(20px,3vw,32px);font-weight:900;text-shadow:0 3px 8px #160c40}
+.homegrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:12px;flex:1;min-height:0}
+.choice{border:3px solid #ffffff66;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:clamp(17px,2.4vw,26px);font-weight:900;box-shadow:0 7px 0 #160e3c66;min-height:150px}
+.emoji{font-size:clamp(55px,9vw,100px);filter:drop-shadow(0 5px 5px #33205c66)}
+.stage{position:relative;flex:1;min-height:0;overflow:hidden;border-radius:22px;margin:0 12px 12px;background:radial-gradient(ellipse at 50% 40%,#50419c,#17153d 80%);touch-action:none}
+canvas{position:absolute;inset:0;width:100%;height:100%}
+.back{border:2px solid #ffffff77;background:#ffffff20;border-radius:18px;padding:9px 17px;font-weight:bold;font-size:17px}
+.bigchar{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:clamp(100px,20vw,190px);filter:drop-shadow(0 8px 12px #1118);transition:transform .2s}
+.hint{text-align:center;font-size:clamp(15px,2vw,21px);font-weight:bold;padding:8px}
+.musicbuttons{position:absolute;inset:auto 0 12px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.musicbuttons button{font-size:clamp(22px,4vw,36px);padding:12px 22px;border-radius:18px;border:2px solid #fff9;background:#ffffff27}
+.spark{position:absolute;pointer-events:none;font-size:32px;animation:pop .8s ease-out forwards}
+@keyframes pop{0%{transform:scale(.2) rotate(0);opacity:1}100%{transform:scale(2.2) rotate(100deg);opacity:0}}
+#footer{text-align:center;padding:5px 8px 10px;font-size:12px;opacity:.8}
+@media(max-width:550px){.homegrid{gap:6px;padding:6px}.choice{border-radius:14px}.top{padding:8px}}
+@media(orientation:portrait){.homegrid{grid-template-columns:1fr;grid-template-rows:repeat(3,minmax(0,1fr));overflow:auto}.choice{min-height:100px;flex-direction:row}.emoji{font-size:48px}}
+</style>
+</head>
+<body>
+<div id="joyapp">
+ <div class="top"><div class="heading">✨ わくわく！あそびワールド ✨</div><button id="sound" class="back">🔊 音 ON</button></div>
+ <div id="home" class="homegrid">
+  <button class="choice" style="background:linear-gradient(145deg,#ed65ad,#7545c8)" data-mode="fire"><span class="emoji">🎆</span>キラキラ花火</button>
+  <button class="choice" style="background:linear-gradient(145deg,#65cbe9,#5961c7)" data-mode="char"><span class="emoji">👾</span>キャラと遊ぼう</button>
+  <button class="choice" style="background:linear-gradient(145deg,#f3b34e,#d85b9b)" data-mode="music"><span class="emoji">🎵</span>音楽で遊ぼう</button>
+ </div>
+ <div id="play" style="display:none;flex:1;min-height:0;flex-direction:column">
+  <div class="top"><button id="back" class="back">← もどる</button><div id="modeTitle" class="heading">🎆 花火</div><span style="font-size:22px">⭐</span></div>
+  <div class="stage" id="stage"><canvas id="canvas"></canvas><div id="character" class="bigchar" style="display:none">👾</div><div id="musicbuttons" class="musicbuttons" style="display:none"><button data-note="261.63">🔴</button><button data-note="329.63">🟡</button><button data-note="392">🔵</button><button data-note="523.25">🟣</button></div></div>
+  <div id="hint" class="hint">画面の好きなところをタッチしてね！</div>
+ </div>
+ <div id="footer">さわってみよう！ どれを選んでも大丈夫 🌟</div>
+</div>
+<script>
+(()=>{
+const root=document.getElementById('joyapp'),home=root.querySelector('#home'),play=root.querySelector('#play'),stage=root.querySelector('#stage'),canvas=root.querySelector('#canvas'),ctx=canvas.getContext('2d'),character=root.querySelector('#character'),musicbuttons=root.querySelector('#musicbuttons'),hint=root.querySelector('#hint');
+let mode='',muted=false,particles=[],audio=null,anim=0,chars=['👾','👻','🐸','🦄','🐙','🐣','👽','🦖'],ci=0;
+function sound(f=440,d=.18){if(muted)return;try{audio=audio||new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();let o=audio.createOscillator(),g=audio.createGain();o.connect(g);g.connect(audio.destination);o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(.12,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+d);o.start();o.stop(audio.currentTime+d)}catch(e){}}
+function resize(){let r=stage.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=r.width*d;canvas.height=r.height*d;ctx.setTransform(d,0,0,d,0,0)}
+function burst(x,y){let colors=['#fff36a','#ff7ccf','#75f4ff','#ffffff','#b69aff','#ff9c53'];for(let i=0;i<95;i++){let a=Math.random()*Math.PI*2,s=2+Math.random()*9;particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:45+Math.random()*30,c:colors[Math.floor(Math.random()*colors.length)],r:2+Math.random()*4})}sound(180+Math.random()*500,.3)}
+function loop(){let d=Math.min(devicePixelRatio||1,2),w=canvas.width/d,h=canvas.height/d;ctx.clearRect(0,0,w,h);particles=particles.filter(p=>p.life>0);for(let p of particles){p.x+=p.vx;p.y+=p.vy;p.vy+=.09;p.vx*=.99;p.life--;ctx.globalAlpha=Math.min(1,p.life/20);ctx.fillStyle=p.c;ctx.shadowBlur=12;ctx.shadowColor=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;ctx.shadowBlur=0;anim=requestAnimationFrame(loop)}
+function start(m){mode=m;home.style.display='none';play.style.display='flex';particles=[];character.style.display='none';musicbuttons.style.display='none';root.querySelector('#modeTitle').textContent={fire:'🎆 キラキラ花火',char:'👾 キャラと遊ぼう',music:'🎵 音楽で遊ぼう'}[m];hint.textContent={fire:'好きなところをタッチ！ 大きな花火が出るよ！',char:'キャラクターをタッチすると変身するよ！',music:'画面をタッチしたり、下のボタンを押してね！'}[m];resize();if(m==='char'){character.style.display='block';character.textContent=chars[ci]}if(m==='music')musicbuttons.style.display='flex';if(m==='fire')burst(stage.clientWidth/4,stage.clientHeight/3)}
+function back(){home.style.display='grid';play.style.display='none';mode='';particles=[]}
+root.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{sound(500);start(b.dataset.mode)}));
+root.querySelector('#back').addEventListener('click',()=>{sound(350);back()});
+root.querySelector('#sound').addEventListener('click',e=>{muted=!muted;e.currentTarget.textContent=muted?'🔇 音 OFF':'🔊 音 ON';if(!muted)sound(500)});
+stage.addEventListener('pointerdown',e=>{if(!mode)return;let r=stage.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(mode==='fire'){burst(x,y);setTimeout(()=>burst(Math.random()*r.width,Math.random()*r.height*.7),160)}else if(mode==='char'){ci=(ci+1)%chars.length;character.textContent=chars[ci];character.style.transform='translate(-50%,-50%) scale(1.3) rotate(12deg)';setTimeout(()=>character.style.transform='translate(-50%,-50%) scale(1)',220);let s=document.createElement('span');s.className='spark';s.textContent=['💖','✨','⭐','💫'][ci%4];s.style.left=x+'px';s.style.top=y+'px';stage.appendChild(s);setTimeout(()=>s.remove(),850);sound(350+ci*80)}else{burst(x,y);sound(250+Math.random()*550,.3)}});
+musicbuttons.querySelectorAll('button').forEach(b=>b.addEventListener('pointerdown',e=>{e.stopPropagation();sound(Number(b.dataset.note),.55);let s=document.createElement('span');s.className='spark';s.textContent='♪';s.style.left=(30+Math.random()*60)+'%';s.style.top='35%';stage.appendChild(s);setTimeout(()=>s.remove(),850)}));
+let sx=0;stage.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});stage.addEventListener('touchend',e=>{if(mode==='char'&&Math.abs(e.changedTouches[0].clientX-sx)>35){ci=(ci+1)%chars.length;character.textContent=chars[ci];sound(550)}},{passive:true});
+window.addEventListener('resize',()=>{if(mode)resize()});loop();
+})();
+</script>
+</body>
+</html>
