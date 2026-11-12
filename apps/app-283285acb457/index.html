@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>わくわく！あそびワールド</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090b2b;color:white;font-family:system-ui,sans-serif;touch-action:none}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 45%,#25245d,#11143d 55%,#07091f)}
+header{height:58px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:8px 16px}h1{font-size:clamp(18px,3vw,27px);margin:0;text-shadow:0 0 12px #ffb8ff}
+button{border:2px solid #ffffff88;border-radius:18px;background:#ffffff20;color:white;font-size:clamp(15px,2.4vw,21px);font-weight:700;padding:9px 17px;touch-action:manipulation}
+#stage{position:relative;flex:1;min-height:0;overflow:hidden}canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+#hint{position:absolute;bottom:12px;left:0;right:0;text-align:center;font-size:clamp(13px,2vw,18px);pointer-events:none;text-shadow:0 1px 5px #000}
+#menu{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:20px}.choice{min-width:24%;min-height:100px;font-size:clamp(18px,3vw,28px);background:linear-gradient(145deg,#ff80cf66,#7c8dff66);box-shadow:0 0 22px #b6aaff44}#back{display:none}
+@media(orientation:portrait){.choice{min-width:42%;min-height:88px}}
+</style></head><body><div id="app"><header><h1>わくわく！あそびワールド</h1><div><button id="sound">♪ 音 ON</button> <button id="back">もどる</button></div></header>
+<div id="stage"><canvas id="c"></canvas><div id="menu"><button class="choice" data-mode="fire">🎆 キラキラ花火</button><button class="choice" data-mode="char">🐻 キャラあそび</button><button class="choice" data-mode="music">🎵 音楽あそび</button></div><div id="hint">あそびをえらんでね！</div></div></div>
+<script>
+(()=>{const c=document.getElementById('c'),ctx=c.getContext('2d'),menu=document.getElementById('menu'),hint=document.getElementById('hint'),back=document.getElementById('back'),sb=document.getElementById('sound');let W,H,mode='menu',ps=[],ci=0,sound=true,audio;const chars=[{kind:'alien',a:'#ff8fcf',b:'#9d7cff',eye:1},{kind:'cat',a:'#ffcf9b',b:'#ff8eaa',eye:0},{kind:'bunny',a:'#b8a7ff',b:'#8edcff',eye:1},{kind:'ghost',a:'#a9f3e8',b:'#7ac8ed',eye:0},{kind:'bear',a:'#ffd98e',b:'#ff9f9f',eye:1},{kind:'star',a:'#ffe88d',b:'#ffb1d7',eye:0},{kind:'frog',a:'#b7ed91',b:'#56d4bd',eye:1},{kind:'octo',a:'#c5a1ff',b:'#ff9bd2',eye:0}];
+function resize(){const r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;c.width=W*d;c.height=H*d;ctx.setTransform(d,0,0,d,0,0)}addEventListener('resize',resize);resize();
+function tone(f=500,d=.13){if(!sound)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=f;g.gain.setValueAtTime(.08,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+d);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+d)}catch(e){}}
+sb.onclick=()=>{sound=!sound;sb.textContent=sound?'♪ 音 ON':'♪ 音 OFF';tone(650)};
+function drawStar(px,py,r,inner,tips,rot){ctx.beginPath();for(let i=0;i<tips*2;i++){const a=rot+i*Math.PI/tips-Math.PI/2,rr=i%2===0?r:inner,xx=px+Math.cos(a)*rr,yy=py+Math.sin(a)*rr;i===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy)}ctx.closePath()}
+function burst(px,py){const colors=['#fff6a5','#fff','#ff9be8','#8ef7ff','#b6a0ff','#ffe0a1'];for(let i=0;i<58;i++){const a=Math.PI*2*i/58+(Math.random()-.5)*.12,s=2.5+Math.random()*6;ps.push({x:px,y:py,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:55+Math.random()*25,max:80,r:3+Math.random()*7,col:colors[Math.random()*colors.length|0],rot:Math.random()*6,spin:(Math.random()-.5)*.18,tips:Math.random()<.5?5:6})}for(let i=0;i<18;i++){const a=Math.random()*6.28,s=1+Math.random()*3;ps.push({x:px,y:py,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:25+Math.random()*20,max:45,r:2,col:'#fff',rot:0,spin:0,line:true})}tone(300+Math.random()*650,.22)}
+function pos(e){const r=c.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+c.onpointerdown=e=>{const p=pos(e);if(mode==='fire')burst(p.x,p.y);else if(mode==='char'){ci=(ci+1)%chars.length;tone(450+ci*55)}else if(mode==='music'){tone([392,440,494,587][Math.min(3,p.x/W*4|0)],.3);burst(p.x,p.y)}};
+c.onpointermove=e=>{if(mode==='char'&&e.buttons)ci=(ci+1)%chars.length};
+document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;menu.style.display='none';back.style.display='inline-block';hint.textContent=mode==='fire'?'画面をタッチしてね！5つ・6つの星の火花がパッと広がるよ':mode==='char'?'タッチやスワイプで、ぷっくりキャラが次々に変わるよ！':'画面の好きなところをタッチして音を鳴らそう！';tone(600)});
+back.onclick=()=>{mode='menu';ps=[];menu.style.display='flex';back.style.display='none';hint.textContent='あそびをえらんでね！'};
+
+function drawCute(ch,cx,cy,size){
+ const g=ctx.createLinearGradient(cx-size*.55,cy-size*.6,cx+size*.55,cy+size*.65);g.addColorStop(0,ch.a);g.addColorStop(1,ch.b);
+ ctx.save();ctx.translate(cx,cy);ctx.shadowColor=ch.b;ctx.shadowBlur=size*.12;
+ // soft floating halo and sparkles
+ ctx.globalAlpha=.22;ctx.fillStyle='#ffffff';ctx.beginPath();ctx.ellipse(0,size*.48,size*.58,size*.10,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ ctx.fillStyle=g;ctx.strokeStyle='#ffffffcc';ctx.lineWidth=Math.max(3,size*.025);
+ if(ch.kind==='cat'){ctx.beginPath();ctx.moveTo(-size*.48,-size*.2);ctx.lineTo(-size*.4,-size*.72);ctx.lineTo(-size*.08,-size*.48);ctx.lineTo(size*.12,-size*.48);ctx.lineTo(size*.42,-size*.72);ctx.lineTo(size*.48,-size*.18);ctx.quadraticCurveTo(size*.55,size*.48,0,size*.55);ctx.quadraticCurveTo(-size*.55,size*.48,-size*.48,-size*.2);ctx.fill();ctx.stroke()}
+ else if(ch.kind==='bunny'){ctx.beginPath();ctx.ellipse(-size*.22,-size*.58,size*.15,size*.42,-.18,0,Math.PI*2);ctx.ellipse(size*.22,-size*.58,size*.15,size*.42,.18,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.beginPath();ctx.ellipse(0,size*.02,size*.49,size*.49,0,0,Math.PI*2);ctx.fill();ctx.stroke()}
+ else if(ch.kind==='bear'||ch.kind==='frog'){ctx.beginPath();ctx.arc(-size*.36,-size*.34,size*.19,0,Math.PI*2);ctx.arc(size*.36,-size*.34,size*.19,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.beginPath();ctx.ellipse(0,0,size*.5,size*.52,0,0,Math.PI*2);ctx.fill();ctx.stroke()}
+ else if(ch.kind==='star'){ctx.beginPath();for(let i=0;i<10;i++){let a=-Math.PI/2+i*Math.PI/5,r=i%2?size*.38:size*.58;let x=Math.cos(a)*r,y=Math.sin(a)*r;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.closePath();ctx.fill();ctx.stroke()}
+ else if(ch.kind==='octo'){ctx.beginPath();ctx.ellipse(0,-size*.08,size*.48,size*.48,0,Math.PI,Math.PI*2);ctx.lineTo(size*.48,size*.34);for(let i=0;i<4;i++){let x=size*(.36-i*.24);ctx.quadraticCurveTo(x+size*.12,size*.62,x-size*.08,size*.48)}ctx.lineTo(-size*.48,size*.34);ctx.closePath();ctx.fill();ctx.stroke()}
+ else {ctx.beginPath();ctx.moveTo(-size*.42,size*.28);ctx.quadraticCurveTo(-size*.62,-size*.45,0,-size*.53);ctx.quadraticCurveTo(size*.62,-size*.45,size*.42,size*.28);ctx.quadraticCurveTo(0,size*.7,-size*.42,size*.28);ctx.fill();ctx.stroke()}
+ // eyes
+ ctx.shadowBlur=0;ctx.fillStyle='#302448';for(const ex of [-.19,.19]){ctx.beginPath();ctx.ellipse(size*ex,-size*.08,size*.055,size*(ch.eye?.09:.075),0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(size*ex-size*.018,-size*.11,size*.022,0,Math.PI*2);ctx.fill();ctx.fillStyle='#302448'}
+ // cheeks and mouth
+ ctx.globalAlpha=.55;ctx.fillStyle='#ff6eaa';for(const ex of [-.31,.31]){ctx.beginPath();ctx.ellipse(size*ex,size*.12,size*.075,size*.035,0,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+ ctx.strokeStyle='#49304f';ctx.lineWidth=Math.max(3,size*.018);ctx.lineCap='round';ctx.beginPath();ctx.arc(0,size*.13,size*.07,.15,Math.PI-.15);ctx.stroke();
+ // little top glint
+ ctx.fillStyle='#fff';ctx.globalAlpha=.8;ctx.beginPath();ctx.arc(-size*.22,-size*.35,size*.055,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ ctx.restore();
+}
+
+function draw(){ctx.clearRect(0,0,W,H);if(mode==='char'){drawCute(chars[ci],W/2,H*.48,Math.min(W*.34,H*.72));}
+if(mode==='music'){for(let i=0;i<4;i++){const px=(i+.5)*W/4;ctx.beginPath();ctx.arc(px,H/2,Math.min(W/12,H/5),0,6.28);ctx.fillStyle=['#ff8acb','#9e9bff','#78e8ff','#ffe38a'][i];ctx.globalAlpha=.8;ctx.fill();ctx.globalAlpha=1;ctx.font='bold 30px sans-serif';ctx.textAlign='center';ctx.fillStyle='#30214f';ctx.fillText(['ド','レ','ミ','ソ'][i],px,H/2+10)}}
+for(let i=ps.length-1;i>=0;i--){const p=ps[i];p.x+=p.vx;p.y+=p.vy;p.vx*=.985;p.vy=p.vy*.985+.035;p.life--;p.rot+=p.spin;ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.col;ctx.shadowColor=p.col;ctx.shadowBlur=14;if(!p.line){drawStar(p.x,p.y,p.r,p.r*.25,p.tips,p.rot);ctx.fill()}else{ctx.beginPath();ctx.moveTo(p.x-p.r,p.y);ctx.lineTo(p.x+p.r,p.y);ctx.moveTo(p.x,p.y-p.r);ctx.lineTo(p.x,p.y+p.r);ctx.lineWidth=1.8;ctx.strokeStyle=p.col;ctx.stroke()}ctx.shadowBlur=0;ctx.globalAlpha=1;if(p.life<=0)ps.splice(i,1)}requestAnimationFrame(draw)}draw()})();
+</script></body></html>
