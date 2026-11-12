@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>キラキラ☆アイドルダンス</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Arial", "Hiragino Kaku Gothic ProN", sans-serif;
+  background: linear-gradient(180deg,#b9eaff,#e8d9ff,#ffdff2);
+  color: #554a9b;
+  text-align: center;
+  overflow-x: hidden;
+}
+
+header {
+  padding: 20px 10px 8px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(25px,5vw,38px);
+  color: #648bdb;
+  text-shadow: 2px 3px white, 0 0 12px white;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  color: #9278c9;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.stage {
+  position: relative;
+  width: min(100% - 24px, 850px);
+  height: 440px;
+  margin: 12px auto;
+  border: 5px solid white;
+  border-radius: 28px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 30%, #fff 0%, transparent 35%),
+    linear-gradient(180deg,#91c9ff,#d8c5ff 65%,#ffcce9);
+  box-shadow: 0 10px 30px #8b9ee966;
+}
+
+.stage::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 15% 30%, #fff9 2px, transparent 4px),
+    radial-gradient(circle at 80% 20%, #fff9 3px, transparent 5px),
+    radial-gradient(circle at 60% 55%, #fff8 2px, transparent 4px),
+    radial-gradient(circle at 30% 70%, #fff9 3px, transparent 5px);
+  background-size: 130px 120px;
+  animation: sparkle 4s linear infinite;
+}
+
+@keyframes sparkle {
+  0% { transform: translateY(0); opacity: .5; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-25px); opacity: .5; }
+}
+
+.stage-lights {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg,transparent 30%,#ffffff33 50%,transparent 70%);
+  animation: light 4s ease-in-out infinite;
+}
+
+@keyframes light {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.dancers {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  padding: 0 3% 8px;
+}
+
+.dancer {
+  width: 32%;
+  max-width: 225px;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.dancer svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.floor {
+  position: absolute;
+  width: 100%;
+  height: 45px;
+  bottom: 0;
+  background: linear-gradient(180deg,#ffffff22,#a5a0e955);
+  border-top: 2px solid #fff9;
+  z-index: 1;
+}
+
+.spotlight {
+  position: absolute;
+  bottom: 0;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(0deg,#ffffff35,transparent);
+  transform: skew(-15deg);
+  filter: blur(10px);
+}
+
+.info {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 15px;
+}
+
+.name {
+  background: #ffffffbb;
+  border: 2px solid white;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.controls {
+  padding: 10px 12px 25px;
+}
+
+button {
+  border: none;
+  padding: 14px 30px;
+  margin: 6px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(135deg,#76a9ff,#b78bff);
+  box-shadow: 0 5px 0 #8875cb;
+  transition: .2s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+button:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #8875cb;
+}
+
+button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+#timer {
+  font-size: 24px;
+  font-weight: bold;
+  color: #7b78d9;
+  margin: 10px;
+}
+
+#status {
+  color: #9875c7;
+  font-size: 14px;
+  min-height: 22px;
+}
+
+footer {
+  padding: 12px;
+  color: #927bb8;
+  font-size: 11px;
+}
+
+.star {
+  position: absolute;
+  color: white;
+  font-size: 23px;
+  pointer-events: none;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(30deg); }
+}
+
+@media(max-width:500px) {
+  .stage {
+    height: 360px;
+  }
+  .dancers {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .dancer {
+    width: 34%;
+  }
+  .name {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>✨ キラキラ☆アイドルダンス ✨</h1>
+  <div class="subtitle">
+    3人のアイドルと一緒に夢のステージへ！
+  </div>
+</header>
+
+<div class="stage" id="stage">
+  <div class="stage-lights"></div>
+  <div class="spotlight" style="left:5%"></div>
+  <div class="spotlight" style="left:35%"></div>
+  <div class="spotlight" style="left:65%"></div>
+
+  <div class="star" style="top:12%;left:10%">✦</div>
+  <div class="star" style="top:28%;right:12%;animation-delay:1s">✧</div>
+  <div class="star" style="top:60%;left:45%;animation-delay:2s">✦</div>
+
+  <div class="dancers">
+
+    <div class="dancer" id="dancer0"></div>
+    <div class="dancer" id="dancer1"></div>
+    <div class="dancer" id="dancer2"></div>
+
+  </div>
+
+  <div class="floor"></div>
+</div>
+
+<div class="info">
+  <div class="name">💙 アオイ</div>
+  <div class="name">💜 ミユ</div>
+  <div class="name">🩷 ココ</div>
+</div>
+
+<div id="timer">10.0 秒</div>
+<div id="status">スタートボタンを押してね！</div>
+
+<div class="controls">
+  <button id="startButton" onclick="startDance()">
+    ✨ ダンススタート！
+  </button>
+
+  <button onclick="stopDance()">
+    ■ ストップ
+  </button>
+</div>
+
+<footer>
+  Original Idol Dance Stage ☆ Made with Love
+</footer>
+
+<script>
+/* =========================
+   キャラクター作成
+========================= */
+
+const characters = [
+  {
+    hair: "#294dba",
+    hair2: "#668ff5",
+    dress: "#55aaff",
+    skirt: "#83caff",
+    ribbon: "#fff0ff",
+    skin: "#ffe0cb",
+    eye: "#3984d9",
+    accent: "#fff3ff"
+  },
+  {
+    hair: "#6747a7",
+    hair2: "#b29af5",
+    dress: "#a88be9",
+    skirt: "#d0aaff",
+    ribbon: "#fff1ff",
+    skin: "#ffe2d1",
+    eye: "#805bc9",
+    accent: "#ffffff"
+  },
+  {
+    hair: "#d65d9b",
+    hair2: "#ff9fca",
+    dress: "#ff83b6",
+    skirt: "#ffb6d6",
+    ribbon: "#fff4fc",
+    skin: "#ffe2d0",
+    eye: "#b84b94",
+    accent: "#fff4fc"
+  }
+];
+
+function createGirl(c, index) {
+
+return `
+<svg viewBox="0 0 200 360" xmlns="http://www.w3.org/2000/svg">
+
+<defs>
+  <linearGradient id="hair${index}" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="${c.hair2}"/>
+    <stop offset="100%" stop-color="${c.hair}"/>
+  </linearGradient>
+
+  <linearGradient id="dress${index}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${c.accent}"/>
+    <stop offset="100%" stop-color="${c.dress}"/>
+  </linearGradient>
+</defs>
+
+<!-- 影 -->
+<ellipse cx="100" cy="343" rx="48" ry="9"
+ fill="#8472c8" opacity=".25"/>
+
+<!-- 後ろ髪 -->
+<g id="backHair${index}">
+ <path d="M53 78 Q35 15 95 20 Q165 10 150 90
+ Q163 135 140 173 L62 173 Q40 130 53 78"
+ fill="url(#hair${index})"/>
+ <path d="M60 75 Q48 130 68 166 L82 168
+ Q64 120 83 50" fill="${c.hair2}" opacity=".6"/>
+</g>
+
+<!-- 左足 -->
+<g id="legL${index}">
+ <path d="M83 242 Q75 280 72 310"
+ fill="none" stroke="${c.skin}" stroke-width="15"
+ stroke-linecap="round"/>
+ <path d="M72 308 Q53 311 49 326 Q49 337 81 333
+ L88 317" fill="#ffffff" stroke="${c.dress}" stroke-width="3"/>
+</g>
+
+<!-- 右足 -->
+<g id="legR${index}">
+ <path d="M116 242 Q123 280 130 310"
+ fill="none" stroke="${c.skin}" stroke-width="15"
+ stroke-linecap="round"/>
+ <path d="M130 308 Q151 310 154 326 Q155 337 124 333
+ L116 317" fill="#ffffff" stroke="${c.dress}" stroke-width="3"/>
+</g>
+
+<!-- 体 -->
+<g id="body${index}">
+
+  <!-- スカート -->
+  <path d="M73 190 Q100 180 127 190
+  Q145 220 160 257 Q100 272 40 257
+  Q55 220 73 190"
+  fill="url(#dress${index})"
+  stroke="${c.accent}" stroke-width="3"/>
+
+  <path d="M48 245 Q100 258 152 245"
+  fill="none" stroke="${c.accent}" stroke-width="4"/>
+
+  <path d="M58 225 L72 247 M87 222 L92 255
+  M112 222 L108 255 M139 225 L125 248"
+  stroke="#ffffff" stroke-width="3" opacity=".7"/>
+
+  <!-- 胴体 -->
+  <path d="M73 135 Q100 126 127 135
+  L132 200 Q100 215 68 200 Z"
+  fill="url(#dress${index})"
+  stroke="${c.accent}" stroke-width="3"/>
+
+  <!-- 胸元 -->
+  <path d="M88 137 L100 151 L112 137"
+  fill="none" stroke="#fff" stroke-width="4"/>
+
+  <!-- リボン -->
+  <path d="M100 151 Q76 132 77 151 Q81 165 100 153
+  Q119 165 123 151 Q125 132 100 151"
+  fill="${c.ribbon}" stroke="${c.dress}" stroke-width="2"/>
+
+  <circle cx="100" cy="151" r="5" fill="#fff"/>
+
+  <!-- 腕左 -->
+  <g id="armL${index}">
+    <path d="M76 146 Q53 155 51 185"
+    fill="none" stroke="${c.skin}" stroke-width="13"
+    stroke-linecap="round"/>
+    <path d="M51 185 Q44 191 45 199"
+    fill="none" stroke="${c.skin}" stroke-width="11"
+    stroke-linecap="round"/>
+    <circle cx="45" cy="199" r="7" fill="${c.skin}"/>
+    <path d="M70 145 L83 152"
+    stroke="${c.accent}" stroke-width="6"/>
+  </g>
+
+  <!-- 腕右 -->
+  <g id="armR${index}">
+    <path d="M124 146 Q147 155 149 185"
+    fill="none" stroke="${c.skin}" stroke-width="13"
+    stroke-linecap="round"/>
+    <path
