@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ちいかわ風 九九れんしゅう</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-pink: #FFEFF2;
+      --bg-yellow: #FFF9D6;
+      --bg-blue: #E6F3FF;
+      --card-bg: #FFFFFF;
+      --border-brown: #5C4438;
+      --text-main: #4A372E;
+      --accent-pink: #FF8DA1;
+      --accent-pink-dark: #E86B82;
+      --accent-yellow: #FFD166;
+      --accent-yellow-dark: #E5B242;
+      --accent-blue: #7CC6FE;
+      --accent-blue-dark: #54A4E0;
+      --accent-green: #80ED99;
+      --accent-green-dark: #57CC75;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background-color: var(--bg-pink);
+      background-image:
+        radial-gradient(#FFD6DF 2px, transparent 2px),
+        radial-gradient(#FFF0B3 2px, var(--bg-pink) 2px);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 540px;
+      background: var(--card-bg);
+      border: 4px solid var(--border-brown);
+      border-radius: 32px;
+      box-shadow: 0 10px 0 rgba(92, 68, 56, 0.2);
+      padding: 24px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 効果音トグル */
+    .sound-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--bg-yellow);
+      border: 3px solid var(--border-brown);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 0 var(--border-brown);
+      z-index: 10;
+    }
+    .sound-btn:active {
+      transform: translateY(3px);
+      box-shadow: none;
+    }
+
+    /* タイトル */
+    .header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .title-badge {
+      display: inline-block;
+      background: var(--accent-yellow);
+      border: 3px solid var(--border-brown);
+      border-radius: 999px;
+      padding: 4px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--border-brown);
+    }
+
+    /* キャラクターエリア */
+    .character-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin: 12px 0 18px;
+      background: var(--bg-yellow);
+      border: 3px solid var(--border-brown);
+      border-radius: 24px;
+      padding: 12px 16px;
+    }
+
+    .chara-svg {
+      width: 84px;
+      height: 84px;
+      flex-shrink: 0;
+      animation: bounce 2.2s infinite ease-in-out;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .chara-shake {
+      animation: shake 0.4s ease-in-out !important;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px) rotate(-4deg); }
+      75% { transform: translateX(6px) rotate(4deg); }
+    }
+
+    .speech-bubble {
+      background: #FFFFFF;
+      border: 3px solid var(--border-brown);
+      border-radius: 18px;
+      padding: 10px 14px;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.45;
+      position: relative;
+      flex: 1;
+    }
+    .speech-bubble::before {
+      content: "";
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-width: 8px 12px 8px 0;
+      border-style: solid;
+      border-color: transparent var(--border-brown) transparent transparent;
+    }
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      left: -7px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-width: 6px 9px 6px 0;
+      border-style: solid;
+      border-color: transparent #FFFFFF transparent transparent;
+    }
+
+    /* 画面切り替え */
+    .screen {
+      display: none;
+    }
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 段選択グリッド */
+    .dan-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-weight: 800;
+      border: 3px solid var(--border-brown);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      color: var(--text-main);
+    }
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: none !important;
+    }
+
+    .dan-btn {
+      background: var(--bg-blue);
+      padding: 14px 8px;
+      font-size: 18px;
+      box-shadow: 0 4px 0 var(--border-brown);
+    }
+    .dan-btn:hover {
+      background: #D4EBFF;
+    }
+
+    .random-btn {
+      width: 100%;
+      background: var(--accent-pink);
+      color: #FFFFFF;
+      text-shadow: 1px 1px 0 var(--border-brown);
+      padding: 14px;
+      font-size: 18px;
+      box-shadow: 0 4px 0 var(--border-brown);
+    }
+
+    /* クイズ画面 */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .back-btn {
+      background: #F3ECE8;
+      border: 2px solid var(--border-brown);
+      border-radius: 12px;
+      padding: 6px 12px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .progress-pill {
+      background: var(--bg-blue);
+      border: 2px solid var(--border-brown);
+      border-radius: 999px;
+      padding: 4px 14px;
+    }
+
+    .question-box {
+      background: var(--bg-pink);
+      border: 4px solid var(--border-brown);
+      border-radius: 26px;
+      padding: 24px 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .question-text {
+      font-size: 46px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: var(--border-brown);
+    }
+
+    .choices-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .choice-btn {
+      background: #FFFFFF;
+      padding: 18px 8px;
+      font-size: 30px;
+      box-shadow: 0 5px 0 var(--border-brown);
+    }
+    .choice-btn:hover {
+      background: var(--bg-yellow);
+    }
+
+    /* 視覚的カウント（間違い時の復習エリア） */
+    .visual-box {
+      background: #FFFDF7;
+      border: 3px dashed var(--border-brown);
+      border-radius: 22px;
+      padding: 16px;
+      margin-top: 14px;
+      text-align: center;
+    }
+    .visual-desc {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--accent-pink-dark);
+    }
+    .groups-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    .group-card {
+      background: var(--bg-blue);
+      border: 2.5px solid var(--border-brown);
+      border-radius: 16px;
+      padding: 8px 10px;
+      min-width: 76px;
+    }
+    .group-label {
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      color: var(--border-brown);
+    }
+    .items-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 5px;
+      max-width: 110px;
+      margin: 0 auto;
+    }
+    .count-item {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 2px solid var(--border-brown);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .count-item.counted {
+      background: var(--accent-yellow);
+      transform: scale(1.12);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .count-status {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .count-number {
+      font-size: 26px;
+      color: var(--accent-pink-dark);
+    }
+
+    .visual-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .auto-count-btn {
+      background: var(--accent-blue);
+      padding: 10px 16px;
+      font-size: 15px;
+      box-shadow: 0 4px 0 var(--border-brown);
+    }
+    .retry-btn {
+      background: var(--accent-green);
+      padding: 10px 20px;
+      font-size: 16px;
+      box-shadow: 0 4px 0 var(--border-brown);
+    }
+
+    /* 結果画面 */
+    .result-box {
+      text-align: center;
+      padding: 16px 8px;
+    }
+    .score-display {
+      font-size: 38px;
+      font-weight: 800;
+      color: var(--accent-pink-dark);
+      margin: 10px 0 18px;
+    }
+    .home-btn {
+      background: var(--accent-yellow);
+      padding: 14px 28px;
+      font-size: 18px;
+      box-shadow: 0 4px 0 var(--border-brown);
+    }
+
+    /* キラキラ星エフェクト */
+    .star-particle {
+      position: fixed;
+      pointer-events: none;
+      font-size: 24px;
+      z-index: 999;
+      animation: flyStar 0.9s ease-out forwards;
+    }
+    @keyframes flyStar {
+      0% { opacity: 1; transform: translate(0, 0) scale(0.6) rotate(0deg); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.3) rotate(180deg); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <button class="sound-btn" id="soundToggle" title="おとの オン・オフ">🔊</button>
+
+  <div class="header">
+    <div class="title-badge">みんなで かぞえよう！</div>
+    <h1>ちいかわ風 九九れんしゅう</h1>
+  </div>
+
+  <!-- キャラクター＆吹き出し -->
+  <div class="character-area">
+    <svg class="chara-svg" id="charaSvg" viewBox="0 0 120 120">
+      <!-- 耳 -->
+      <circle cx="32" cy="30" r="16" fill="#FFFFFF" stroke="#5C4438" stroke-width="5"/>
+      <circle cx="32" cy="30" r="8" fill="#FFC2D1"/>
+      <circle cx="88" cy="30" r="16" fill="#FFFFFF" stroke="#5C4438" stroke-width="5"/>
+      <circle cx="88" cy="30" r="8" fill="#FFC2D1"/>
+      <!-- 輪郭 -->
+      <ellipse cx="60" cy="68" rx="44" ry="38" fill="#FFFFFF" stroke="#5C4438" stroke-width="5"/>
+      <!-- ほっぺ -->
+      <ellipse cx="32" cy="72" rx="8" ry="5" fill="#FF9EB5" opacity="0.8"/>
+      <ellipse cx="88" cy="72" rx="8" ry="5" fill="#FF9EB5" opacity="0.8"/>
+
+      <!-- 表情：ふつう -->
+      <g id="face-normal">
+        <circle cx="44" cy="62" r="4.5" fill="#5C4438"/>
+        <circle cx="42.5" cy="60.5" r="1.5" fill="#FFFFFF"/>
+        <circle cx="76" cy="62" r="4.5" fill="#5C4438"/>
+        <circle cx="74.5" cy="60.5" r="1.5" fill="#FFFFFF"/>
+        <path d="M 52 72 Q 56 76 60 72 Q 64 76 68 72" fill="none" stroke="#5C4438" stroke-width="3.5" stroke-linecap="round"/>
+      </g>
+
+      <!-- 表情：せいかい（うれしい） -->
+      <g id="face-happy" style="display:none;">
+        <path d="M 38 62 Q 44 54 50 62" fill="none" stroke="#5C4438" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 70 62 Q 76 54 82 62" fill="none" stroke="#5C4438" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 50 71 Q 60 85 70 71 Z" fill="#FF8DA1" stroke="#5C4438" stroke-width="3"/>
+      </g>
+
+      <!-- 表情：まちがい（うるうる） -->
+      <g id="face-sad" style="display:none;">
+        <path d="M 38 56 L 49 60" stroke="#5C4438" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M 82 56 L 71 60" stroke="#5C4438" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="44" cy="65" r="5" fill="#5C4438"/>
+        <circle cx="42" cy="63" r="2" fill="#FFFFFF"/>
+        <circle cx="76" cy="65" r="5" fill="#5C4438"/>
+        <circle cx="74" cy="63" r="2" fill="#FFFFFF"/>
+        <!-- なみだ -->
+        <path d="M 35 70 Q 32 78 36 78 Q 39 78 35 70" fill="#7CC6FE"/>
+        <path d="M 85 70 Q 82 78 86 78 Q 89 78 85 70" fill="#7CC6FE"/>
+        <path d="M 53 78 Q 60 72 67 78" fill="none" stroke="#5C4438" stroke-width="3.5" stroke-linecap="round"/>
+      </g>
+    </svg>
+
+    <div class="speech-bubble" id="speechText">
+      どの だんに ちょうせん する？
+    </div>
+  </div>
+
+  <!-- 1. 段選択画面 -->
+  <div id="selectScreen" class="screen active">
+    <div class="dan-grid" id="danGrid"></div>
+    <button class="btn random-btn" id="randomBtn">✨ ランダム 9もん ✨</button>
+  </div>
+
+  <!-- 2. クイズ画面 -->
+  <div id="quizScreen" class="screen">
+    <div class="status-bar">
+      <button class="back-btn" id="backBtn">← もどる</button>
+      <div class="progress-pill" id="progressText">1 / 9 もんめ</div>
+    </div>
+
+    <div class="question-box">
+      <div class="question-text" id="questionText">2 × 1 ＝ ？</div>
+    </div>
+
+    <div class="choices-grid" id="choicesGrid"></div>
+
+    <!-- 間違えたときの視覚的カウントエリア -->
+    <div class="visual-box" id="visualBox" style="display:none;">
+      <div class="visual-desc" id="visualDesc"></div>
+      <div class="groups-container" id="groupsContainer"></div>
+      <div class="count-status">
+        かぞえた かず： <span class="count-number" id="countedNum">0</span> こ
+      </div>
+      <div class="visual-actions">
+        <button class="btn auto-count-btn" id="autoCountBtn">🪄 ぜんぶ かぞえる</button>
+        <button class="btn retry-btn" id="retryBtn">もういちど ちょうせん！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. 結果画面 -->
+  <div id="resultScreen" class="screen">
+    <div class="result-box">
+      <div style="font-size: 20px; font-weight: 800;">おつかれさま！</div>
+      <div class="score-display" id="scoreDisplay">9もん中 9もん せいかい！</div>
+      <button class="btn home-btn" id="homeBtn">だんを えらぶ画面へ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- 効果音 (Web Audio API) ---
+  let soundEnabled = true;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+
+  function playTone(freq, type = 'sine', duration = 0.12, delay = 0) {
+    if (!soundEnabled) return;
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + delay);
+    osc.stop(audioCtx.currentTime + delay + duration);
+  }
+
+  function playCorrectSound() {
+    playTone(523.25, 'triangle', 0.12, 0);     // ド
+    playTone(659.25, 'triangle', 0.12, 0.1);   // ミ
+    playTone(783.99, 'triangle', 0.25, 0.2);   // ソ
+  }
+
+  function playWrongSound() {
+    playTone(300, 'sawtooth', 0.18, 0);
+    playTone(240, 'sawtooth', 0.25, 0.16);
+  }
+
+  function playPopSound(step = 0) {
+    const base = 440 + Math.min(step * 18, 440);
+    playTone(base, 'sine', 0.08, 0);
+  }
+
+  // --- アプリ状態管理 ---
+  const itemIcons = ['🍓', '🍬', '🍎', '🍩', '⭐', '🍊', '🍪', '🍒', '🍑'];
+  let questions = [];
+  let currentIndex = 0;
+  let firstTryCorrectCount = 0;
+  let hasMissedCurrent = false;
+  let countedTotal = 0;
+  let autoCountTimer = null;
+
+  // DOM要素
+  const selectScreen = document.getElementById('selectScreen');
+  const quizScreen = document.getElementById('quizScreen');
+  const resultScreen = document.getElementById('resultScreen');
+  const speechText = document.getElementById('speechText');
+  const charaSvg = document.getElementById('charaSvg');
+
+  // 表情変更
+  function setCharaFace(mood, message) {
+    document.getElementById('face-normal').style.display = mood === 'normal' ? 'block' : 'none';
+    document.getElementById('face-happy').style.display = mood === 'happy' ? 'block' : 'none';
+    document.getElementById('face-sad').style.display = mood === 'sad' ? 'block' : 'none';
+    speechText.innerHTML = message;
+
+    if (mood === 'sad') {
+      charaSvg.classList.remove('chara-shake');
+      void charaSvg.offsetWidth;
+      charaSvg.classList.add('chara-shake');
+    }
+  }
+
+  // キラキラエフェクト
+  function spawnStars(x, y) {
+    const emojis = ['⭐', '✨', '🌸', '💖'];
+    for (let i = 0; i < 10; i++) {
+      const el = document.createElement('div');
+      el.className = 'star-particle';
+      el.textContent = emojis[i % emojis.length];
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      const angle = (Math.PI * 2 * i) / 10;
+      const dist = 60 + Math.random() * 60;
+      el.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+      el.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 900);
+    }
+  }
+
+  // 画面切り替え
+  function showScreen(screenEl) {
+    [selectScreen, quizScreen, resultScreen].forEach(s => s.classList.remove('active'));
+    screenEl.classList.add('active');
+  }
+
+  // 段選択ボタン生成
+  const danGrid = document.getElementById('danGrid');
+  for (let dan = 1; dan <= 9; dan++) {
+    const btn = document.createElement('button');
+    btn.className = 'btn dan-btn';
+    btn.textContent = `${dan} のだん`;
+    btn.onclick = () => startQuiz(dan);
+    danGrid.appendChild(btn);
+  }
+
+  document.getElementById('randomBtn').onclick = () => startQuiz(0);
+
+  // クイズ開始
+  function startQuiz(dan) {
+    playPopSound(2);
+    questions = [];
+    if (dan === 0) {
+      // ランダム9問
+      const pool = [];
+      for (let a = 1; a <= 9; a++) {
+        for (let b = 1; b <= 9; b++) {
+          pool.push({ a, b });
+        }
+      }
+      pool.sort(() => Math.random() - 0.5);
+      questions = pool.slice(0, 9);
+    } else {
+      for (let b = 1; b <= 9; b++) {
+        questions.push({ a: dan, b });
+      }
+    }
+    currentIndex = 0;
+    firstTryCorrectCount = 0;
+    showScreen(quizScreen);
+    loadQuestion();
+  }
+
+  // 3択生成
+  function generateChoices(a, b) {
+    const ans = a * b;
+    const set = new Set([ans]);
+    const candidates = [
+      a * (b + 1),
+      a * (b - 1),
+      (a + 1) * b,
+      (a - 1) * b,
+      ans + 1,
+      ans - 1,
+      ans + 2,
+      ans - 2,
+      a + b
+    ].filter(n => n > 0 && n !== ans);
+
+    candidates.sort(() => Math.random() - 0.5);
+    for (const c of candidates) {
+      if (set.size < 3) set.add(c);
+    }
+    while (set.size < 3) {
+      const r = Math.floor(Math.random() * 81) + 1;
+      if (r !== ans) set.add(r);
+    }
+    return Array.from(set).sort(() => Math.random() - 0.5);
+  }
+
+  // 問題表示
+  function loadQuestion() {
+    clearInterval(autoCountTimer);
+    hasMissedCurrent = false;
+    const q = questions[currentIndex];
+    document.getElementById('progressText').textContent = `${currentIndex + 1} / ${questions.length} もんめ`;
+    document.getElementById('questionText').textContent = `${q.a} × ${q.b} ＝ ？`;
+    document.getElementById('visualBox').style.display = 'none';
+
+    setCharaFace('normal', `<strong>${q.a} × ${q.b}</strong> の こたえは どれかな？`);
+
+    const choices = generateChoices(q.a, q.b);
+    const grid = document.getElementById('choicesGrid');
+    grid.innerHTML = '';
+    grid.style.display = 'grid';
+
+    choices.forEach(val => {
+      const btn = document.createElement('button');
+      btn.className = 'btn choice-btn';
+      btn.textContent = val;
+      btn.onclick = (e) => handleAnswer(val, e);
+      grid.appendChild(btn);
+    });
+  }
+
+  // 回答チェック
+  function handleAnswer(selected, event) {
+    const q = questions[currentIndex];
+    const correct = q.a * q.b;
+
+    if (selected === correct) {
+      playCorrectSound();
+      if (!hasMissedCurrent) firstTryCorrectCount++;
+      setCharaFace('happy', `わぁっ！せいかい！<br><strong>${q.a} × ${q.b} ＝ ${correct}</strong> だね！`);
+      if (event) spawnStars(event.clientX, event.clientY);
+
+      const btns = document.querySelectorAll('.choice-btn');
+      btns.forEach(b => b.disabled = true);
+
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < questions.length) {
+          loadQuestion();
+        } else {
+          showResult();
+        }
+      }, 1150);
+    } else {
+      playWrongSound();
+      hasMissedCurrent = true;
+      setCharaFace('sad', `おしいっ…！<br>いっしょに かぞえて たしかめよう！`);
+      showVisualCounter(q.a, q.b);
+    }
+  }
+
+  // 視覚的カウント画面の構築（A × B ＝ A個のあつまりが Bグループ）
+  function showVisualCounter(a, b) {
+    document.getElementById('choicesGrid').style.display = 'none';
+    const visualBox = document.getElementById('visualBox');
+    visualBox.style.display = 'block';
+
+    document.getElementById('visualDesc').textContent =
+      `${a} × ${b} は 「${a}この あつまりが ${b}グループ」 だよ！タップして かぞえてみよう`;
+
+    countedTotal = 0;
+    document.getElementById('countedNum').textContent = '0';
+
+    const container = document.getElementById('groupsContainer');
+    container.innerHTML = '';
+    const icon = itemIcons[(a + b) % itemIcons.length];
+
+    // Bグループ作成し、各グループにA個のアイテムを配置
+    for (let g = 1; g <= b; g++) {
+      const card = document.createElement('div');
+      card.className = 'group-card';
+
+      const label = document.createElement('div');
+      label.className = 'group-label';
+      label.textContent = `${g}グループめ`;
+      card.appendChild(label);
+
+      const itemsWrap = document.createElement('div');
+      itemsWrap.className = 'items-wrap';
+
+      for (let i = 1; i <= a; i++) {
+        const item = document.createElement('div');
+        item.className = 'count-item';
+        item.textContent = icon;
+        item.onclick = () => countSingleItem(item);
+        itemsWrap.appendChild(item);
+      }
+
+      card.appendChild(itemsWrap);
+      container.appendChild(card);
+    }
+  }
+
+  function countSingleItem(itemEl) {
+    if (itemEl.classList.contains('counted')) return;
+    countedTotal++;
+    itemEl.classList.add('counted');
+    itemEl.textContent = countedTotal;
+    document.getElementById('countedNum').textContent = countedTotal;
+    playPopSound(countedTotal);
+
+    const q = questions[currentIndex];
+    if (countedTotal === q.a * q.b) {
+      setCharaFace('happy', `ぜんぶで <strong>${countedTotal}こ</strong> あったね！<br>「もういちど ちょうせん！」を おしてね！`);
+    }
+  }
+
+  // ぜんぶ自動で数えるボタン
+  document.getElementById('autoCountBtn').onclick = () => {
+    clearInterval(autoCountTimer);
+    const items = Array.from(document.querySelectorAll('.count-item:not(.counted)'));
+    let idx = 0;
+    if (items.length === 0) return;
+
+    autoCountTimer = setInterval(() => {
+      if (idx >= items.length) {
+        clearInterval(autoCountTimer);
+        return;
+      }
+      countSingleItem(items[idx]);
+      idx++;
+    }, 140);
+  };
+
+  // もう一度挑戦ボタン
+  document.getElementById('retryBtn').onclick = () => {
+    clearInterval(autoCountTimer);
+    playPopSound(1);
+    const q = questions[currentIndex];
+    document.getElementById('visualBox').style.display = 'none';
+    document.getElementById('choicesGrid').style.display = 'grid';
+    setCharaFace('normal', `こんどは だいじょうぶ！<br><strong>${q.a} × ${q.b}</strong> の こたえを えらんでね！`);
+  };
+
+  // 結果画面表示
+  function showResult() {
+    showScreen(resultScreen);
+    document.getElementById('scoreDisplay').textContent =
+      `${questions.length}もん中 ${firstTryCorrectCount}もん せいかい！`;
+
+    if (firstTryCorrectCount === questions.length) {
+      playCorrectSound();
+      setCharaFace('happy', 'すごーい！！パーフェクト！！<br>とっても よく がんばったね！');
+      spawnStars(window.innerWidth / 2, window.innerHeight / 3);
+    } else {
+      setCharaFace('happy', 'さいごまで よく がんばったね！<br>また いっしょに れんしゅうしよう！');
+    }
+  }
+
+  // 戻るボタン・ホームボタン・音トグル
+  document.getElementById('backBtn').onclick = () => {
+    clearInterval(autoCountTimer);
+    showScreen(selectScreen);
+    setCharaFace('normal', 'どの だんに ちょうせん する？');
+  };
+
+  document.getElementById('homeBtn').onclick = () => {
+    showScreen(selectScreen);
+    setCharaFace('normal', 'つぎは どの だんに する？');
+  };
+
+  document.getElementById('soundToggle').onclick = (e) => {
+    soundEnabled = !soundEnabled;
+    e.target.textContent = soundEnabled ? '🔊' : '🔇';
+  };
+</script>
+
+</body>
+</html>
